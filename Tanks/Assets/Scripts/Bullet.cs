@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Networking;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
-public class Bullet : MonoBehaviour
+public class Bullet : NetworkBehaviour
 {
     Rigidbody _rigidbody;
 
@@ -21,8 +22,13 @@ public class Bullet : MonoBehaviour
 
     public List<string> _bounceTags;
 
+    public List<string> _collisionTags;
+
     public int _bounces = 2;
 
+    public float _damage = 1f;
+
+    public PlayerController _owner;
 
     private void Start()
     {
@@ -30,6 +36,7 @@ public class Bullet : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
         StartCoroutine(SelftDestruct());
+        //this._collisionTags = new List<string>() { "Player" };
     }
 
     private IEnumerator SelftDestruct()
@@ -45,11 +52,6 @@ public class Bullet : MonoBehaviour
         _rigidbody.velocity = Vector3.zero;
         _rigidbody.Sleep();
 
-        foreach (MeshRenderer m in GetComponentsInChildren<MeshRenderer>())
-        {
-            m.enabled = false;
-        }
-
         foreach (ParticleSystem ps in _allParticles)
         {
             ps.Stop();
@@ -59,9 +61,17 @@ public class Bullet : MonoBehaviour
         {
             _explosionFx.transform.parent = null;
             _explosionFx.Play();
+            Destroy(_explosionFx.gameObject, 2f); // TODO: use object pool here.
         }
 
-        Destroy(gameObject);
+        if (isServer)
+        {
+            Destroy(gameObject);
+            foreach (MeshRenderer m in GetComponentsInChildren<MeshRenderer>())
+            {
+                m.enabled = false;
+            }
+        }
     }
 
     private void OnCollisionExit(Collision collision)
@@ -74,6 +84,8 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        CheckCollisions(collision);
+
         if (_bounceTags.Contains(collision.gameObject.tag))
         {
             if (_bounces <= 0)
@@ -82,6 +94,19 @@ public class Bullet : MonoBehaviour
             }
 
             _bounces--;
+        }
+    }
+
+    void CheckCollisions(Collision collision)
+    {
+        if (_collisionTags.Contains(collision.collider.tag))
+        {
+            Explode();
+            PlayerHealth playerHealth = collision.gameObject.GetComponentInParent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.Damage(_damage, _owner);
+            }
         }
     }
 

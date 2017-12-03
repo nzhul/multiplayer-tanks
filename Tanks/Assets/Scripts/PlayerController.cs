@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Networking;
 
 [RequireComponent(typeof(PlayerShoot))]
@@ -10,8 +11,15 @@ public class PlayerController : NetworkBehaviour
 
     PlayerHealth _pHealth;
     PlayerMotor _pMotor;
-    PlayerSetup _pSetup;
+    public PlayerSetup _pSetup;
     PlayerShoot _pShoot;
+
+    Vector3 _originalPosition;
+    NetworkStartPosition[] _spawnPoints;
+
+    public GameObject _spawnFx;
+
+    public int _score;
 
     private void Start()
     {
@@ -19,6 +27,14 @@ public class PlayerController : NetworkBehaviour
         _pMotor = GetComponent<PlayerMotor>();
         _pSetup = GetComponent<PlayerSetup>();
         _pShoot = GetComponent<PlayerShoot>();
+
+        GameManager gm = GameManager.Instance;
+    }
+
+    public override void OnStartLocalPlayer()
+    {
+        _spawnPoints = GameObject.FindObjectsOfType<NetworkStartPosition>();
+        _originalPosition = transform.position;
     }
 
     Vector3 GetInput()
@@ -30,7 +46,7 @@ public class PlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if (!isLocalPlayer)
+        if (!isLocalPlayer || _pHealth._isDead)
         {
             return;
         }
@@ -40,9 +56,14 @@ public class PlayerController : NetworkBehaviour
 
     private void Update()
     {
-        if (!isLocalPlayer)
+        if (!isLocalPlayer || _pHealth._isDead)
         {
             return;
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            _pShoot.Shoot();
         }
 
         Vector3 inputDirection = GetInput();
@@ -53,6 +74,39 @@ public class PlayerController : NetworkBehaviour
 
         Vector3 turretDir = Utility.GetWorldPointFromScreenPoint(Input.mousePosition, _pMotor._turret.position.y) - _pMotor._turret.position;
         _pMotor.RotateTurret(turretDir);
+    }
+
+    void Disable()
+    {
+        StartCoroutine("RespawnRoutine");
+    }
+
+    IEnumerator RespawnRoutine()
+    {
+        transform.position = GetRandomSpawnPosition();
+        _pMotor._rigidBody.velocity = Vector3.zero;
+        yield return new WaitForSeconds(3f);
+        _pHealth.Reset();
+
+        if (_spawnFx != null)
+        {
+            GameObject spawnFx = Instantiate(_spawnFx, transform.position + Vector3.up * 0.5f, Quaternion.identity) as GameObject;
+            Destroy(spawnFx, 3f);
+        }
+    }
+
+    Vector3 GetRandomSpawnPosition()
+    {
+        if (_spawnPoints != null)
+        {
+            if (_spawnPoints.Length > 0)
+            {
+                NetworkStartPosition startPos = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
+                return startPos.transform.position;
+            }
+        }
+
+        return _originalPosition;
     }
 
 }

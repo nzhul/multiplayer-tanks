@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 public class PlayerMotor : NetworkBehaviour
 {
 
-    Rigidbody _rigidBody;
+    public Rigidbody _rigidBody;
 
     public Transform _chassis;
 
