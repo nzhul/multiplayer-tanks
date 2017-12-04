@@ -528,6 +528,7 @@ MonoBehaviour:
   _isDead: 0
   _healthBar: {fileID: 224595640984317612}
   _deathPrefab: {fileID: 140182, guid: ead306b39f6b0428fa246bfff7d603ff, type: 2}
+  _lastAttacker: {fileID: 0}
 --- !u!114 &114409828341438642
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -588,6 +589,10 @@ MonoBehaviour:
   _bulletSpawn: {fileID: 4734658222286102}
   _shotsPerBurst: 2
   _reloadTime: 1
+  _misfireEffect: {fileID: 19800000, guid: 06d7eeb38dffc4879b91f487e4924902, type: 2}
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!114 &114513386616520640
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -632,7 +637,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18766baba97785e4386a37e750e6b587, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pSetup: {fileID: 0}
   _spawnFx: {fileID: 118206, guid: 49cea2316ec6a41589509c0e782d9213, type: 2}
+  _score: 0
 --- !u!114 &114629089107388730
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -734,10 +741,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41f9be82815a85d44b8599c7c6f2ee2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerColor: {r: 1, g: 0, b: 0, a: 0}
   _basename: PLAYER
   _playerNum: 1
   _playerNameText: {fileID: 114030076259421880}
-  _playerColor: {r: 1, g: 0, b: 0, a: 0}
 --- !u!136 &136679712594083164
 CapsuleCollider:
   m_ObjectHideFlags: 1

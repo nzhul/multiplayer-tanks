@@ -30,17 +30,24 @@ public class Bullet : NetworkBehaviour
 
     public PlayerController _owner;
 
+    public float _delay = 0.04f;
+
     private void Start()
     {
         _allParticles = GetComponentsInChildren<ParticleSystem>().ToList();
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
         StartCoroutine(SelftDestruct());
-        //this._collisionTags = new List<string>() { "Player" };
     }
 
     private IEnumerator SelftDestruct()
     {
+        _collider.enabled = false;
+
+        yield return new WaitForSeconds(_delay);
+
+        _collider.enabled = true;
+
         yield return new WaitForSeconds(_lifetime);
         Explode();
 

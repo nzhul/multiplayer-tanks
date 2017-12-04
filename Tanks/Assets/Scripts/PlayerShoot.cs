@@ -17,6 +17,9 @@ public class PlayerShoot : NetworkBehaviour
 
     public float _reloadTime = 1f;
 
+    public ParticleSystem _misfireEffect;
+
+    public LayerMask _obstacleMask;
 
     // Use this for initialization
     void Start()
@@ -38,13 +41,34 @@ public class PlayerShoot : NetworkBehaviour
             return;
         }
 
-        CmdShoot();
+        RaycastHit hit;
 
-        _shotsLeft--;
+        Vector3 center = new Vector3(transform.position.x, _bulletSpawn.position.y, transform.position.z);
 
-        if (_shotsLeft <= 0)
+        Vector3 dir = (_bulletSpawn.position - center).normalized;
+
+        if (Physics.SphereCast(center, 0.25f, dir, out hit, 2.6f, _obstacleMask, QueryTriggerInteraction.Ignore))
         {
-            StartCoroutine(Reload());
+
+            // missfire effect
+            if (_misfireEffect != null)
+            {
+                ParticleSystem effect = Instantiate(_misfireEffect, hit.point, Quaternion.identity) as ParticleSystem;
+                effect.Stop();
+                effect.Play();
+                Destroy(effect.gameObject, 3f);
+            }
+        }
+        else
+        {
+            CmdShoot();
+
+            _shotsLeft--;
+
+            if (_shotsLeft <= 0)
+            {
+                StartCoroutine(Reload());
+            }
         }
     }
 
