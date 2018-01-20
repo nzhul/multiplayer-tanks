@@ -6855,7 +6855,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _messageText: {fileID: 746787812}
-  _minPlayers: 1
+  _minPlayers: 2
   _playerCount: 0
   _playerColors:
   - {r: 1, g: 0, b: 0, a: 1}
